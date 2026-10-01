@@ -1,0 +1,8 @@
+numpy>=2.0
+opencv-python-headless>=4.9
+pillow>=10.0
+scipy>=1.12
+onnxruntime>=1.17
+pyloudnorm>=0.1.1
+requests>=2.31
+playwright==1.56.0

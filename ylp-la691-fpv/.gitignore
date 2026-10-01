@@ -1,0 +1,7 @@
+__pycache__/
+models/
+assets/photos/*
+!assets/photos/.gitkeep
+assets/depth/
+output/*.wav
+output/preview*
