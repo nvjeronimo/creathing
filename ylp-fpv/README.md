@@ -33,7 +33,9 @@ Two settings matter most for interiors:
 
 - `dfloor` (per photo): nothing is farther than the room's own walls, so the
   view through a window behaves as a plane in the wall and mullions stay
-  straight. Read it off the depth map at the wall next to the window.
+  straight. Read it off the depth map at the window head, where the ceiling
+  meets the glazing: a floor set at the glass leaves a step at the head and
+  the top of every mullion bends.
 - `heading` (per shot, default on): the camera moves where it looks. Sliding
   sideways relative to the view is what bends thin verticals.
 
