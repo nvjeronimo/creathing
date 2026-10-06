@@ -120,7 +120,7 @@ class Graphics:
 
     # ---------------------------------------------------------------- layout
     def _title_y(self):
-        return self.h * (self.cfg.get("title_y", 0.21) if self.vertical else 0.5)
+        return self.h * self.cfg.get("title_y", 0.21 if self.vertical else 0.5)
 
     def _label_y(self):
         return self.h * 0.66 if self.vertical else self.h - self.margin - 70 * self.s
