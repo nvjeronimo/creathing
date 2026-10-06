@@ -23,6 +23,9 @@ parallax, macro inserts with depth of field, a low-key warm grade matched by
 numbers, and sound design (downlifter, ticks, impact, dropout, reverse swell).
 `tools/ref_*.py` analyse new references the same way.
 
+A test of generative motion (Higgsfield), with the rules a generated clip must
+pass before it can enter a listing video, is planned in `docs/higgsfield_test.md`.
+
 ## Pipeline
 
 | Step | Module | What it does |
@@ -54,7 +57,12 @@ Two settings matter most for interiors:
 ```bash
 pip install -r requirements.txt
 # put the photos in the folder named by the config ("photos"), then:
+# brand logo for the end card (SVG to transparent PNG):
+python3 tools/svg2png.py assets/brand/ylp-logo.svg assets/brand/ylp-logo.png
 ./run.sh config/vm687_reel.json
+# Higgsfield API check, one billable Seedance 2.5 clip (needs HF_KEY=key-id:key-secret
+# in .env.local or the environment, and api.higgsfield.ai reachable):
+python3 main.py
 # review stills without a full render:
 python3 -m fpv.render config/vm687_reel.json sheet.jpg --scale 0.5 --cols 6 --stills 2,8,16,25
 ```

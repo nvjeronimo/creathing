@@ -87,7 +87,8 @@ class Graphics:
         self.theme = g.get("theme", "dark")
         light = self.theme == "light"
         self.ink = hex_rgb(g.get("ink", "#1E1A15" if light else "#F7F3EC"))
-        self.gold = hex_rgb(g.get("accent", "#A07C45" if light else "#C9A66B"))
+        # dark default is the gold of the YLP logo, so text accents match it on the end card
+        self.gold = hex_rgb(g.get("accent", "#A07C45" if light else "#C89756"))
         self.veil = np.array(hex_rgb(g.get("veil", "#FFFFFF" if light else "#000000")),
                              np.float32)
         self.glow = 255.0 if light else 0.0

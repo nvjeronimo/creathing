@@ -9,3 +9,7 @@ assets/*/depth/
 output/
 # Client brand artwork is not ours to publish
 assets/brand/
+# API credentials stay on the machine that runs the code
+.env
+.env.local
+.env.*.local
