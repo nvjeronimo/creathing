@@ -150,6 +150,9 @@ class Timeline:
         self.photos_dir = os.path.join(root, project.get("photos", "assets/photos"))
         self.depth_dir = os.path.join(root, project.get("depth", "assets/depth"))
         self.plate_defaults = project.get("plate", {})
+        # "gimbal" style: no hand wander and no banking, horizon always level
+        self.drift_scale = project.get("drift", 0.0)
+        self.bank = project.get("bank", 0.0)
         self.shots = []
         shots_cfg = project["shots"]
         if shots_cfg == "auto":
@@ -266,9 +269,10 @@ class Timeline:
         c0, c1 = self._base(shot, t - dt), self._base(shot, t + dt)
         yaw_rate = (c1.yaw - c0.yaw) / (2 * dt)
         side = (c1.x - c0.x) / (2 * dt)
-        cam.roll += 0.35 * yaw_rate + 9.0 * side
-        for k, v in self._drift(shot, t).items():
-            setattr(cam, k, getattr(cam, k) + v)
+        cam.roll += self.bank * (0.35 * yaw_rate + 9.0 * side)
+        if self.drift_scale and shot.drift:
+            for k, v in self._drift(shot, t).items():
+                setattr(cam, k, getattr(cam, k) + v * self.drift_scale)
         if with_fix and shot.zoom_fix is not None:
             ts, vs = shot.zoom_fix
             cam.zoom *= float(np.interp(t, ts, vs))

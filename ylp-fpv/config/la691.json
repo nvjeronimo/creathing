@@ -1,20 +1,55 @@
 {
-  "fps": 30,
-  "bpm": 120,
-  "size": [1920, 1080],
-  "duration": 45.0,
-  "photos": "assets/photos",
-  "depth": "assets/depth",
-  "plate": {"hfov": 72, "znear": 1.0, "zfar": 14, "simplify": 0.02},
-  "finish": {"grain": 0.009, "vignette": 0.16, "bloom": 0.07, "warmth": 0.025},
-  "shots": "auto",
-  "music": {"drop": 8.0, "outro": 40.0, "hits": [0.35]},
-  "graphics": {
-    "accent": "#C9A66B",
-    "intro": {"t0": 0.35, "t1": 3.6, "kicker": "LAGOS  ·  ALGARVE  ·  PORTUGAL",
-              "title": "Ria de Alvor", "subtitle": "A villa above the estuary"},
-    "outro": {"t0": 40.0, "kicker": "LAGOS  ·  ALGARVE", "title": "Ria de Alvor",
-              "price": "", "ref": "REF.  LA691", "url": "yourluxuryproperty.com"},
-    "progress": {"t0": 3.6, "t1": 40.0}
+ "fps": 30,
+ "bpm": 120,
+ "size": [
+  1920,
+  1080
+ ],
+ "duration": 45.0,
+ "photos": "assets/photos",
+ "depth": "assets/depth",
+ "plate": {
+  "hfov": 72,
+  "znear": 1.0,
+  "zfar": 14,
+  "simplify": 0.02
+ },
+ "finish": {
+  "grain": 0.009,
+  "vignette": 0.16,
+  "bloom": 0.07,
+  "warmth": 0.025
+ },
+ "shots": "auto",
+ "music": {
+  "drop": 8.0,
+  "outro": 40.0,
+  "hits": [
+   0.35
+  ]
+ },
+ "graphics": {
+  "accent": "#C9A66B",
+  "intro": {
+   "t0": 0.35,
+   "t1": 3.6,
+   "kicker": "LAGOS  \u00b7  ALGARVE  \u00b7  PORTUGAL",
+   "title": "Ria de Alvor",
+   "subtitle": "A villa above the estuary"
+  },
+  "outro": {
+   "t0": 40.0,
+   "kicker": "LAGOS  \u00b7  ALGARVE",
+   "title": "Ria de Alvor",
+   "price": "",
+   "ref": "REF.  LA691",
+   "url": "yourluxuryproperty.com"
+  },
+  "progress": {
+   "t0": 3.6,
+   "t1": 40.0
   }
+ },
+ "drift": 1.0,
+ "bank": 1.0
 }

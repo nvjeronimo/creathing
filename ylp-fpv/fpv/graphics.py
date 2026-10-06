@@ -213,6 +213,7 @@ class Graphics:
         veil = self._specs(layer, draw, t, veil)
         veil = self._outro(layer, draw, t, veil)
         self._lockups(layer, draw, t)
+        self._watermark(draw, t)
         self._progress(draw, t)
         if veil.max() > 0:
             v = veil[..., None]
@@ -419,6 +420,24 @@ class Graphics:
                 self._text(draw, face, extra["text"], self.w / 2, y, color,
                            env * ease_out((lt - 0.6 - 0.15 * k) / 0.7) * extra.get("alpha", 0.9),
                            anchor="c")
+
+    def _watermark(self, draw, t):
+        """Small brand mark fixed at the top for the whole film (Ref 2 style)."""
+        c = self.cfg.get("watermark")
+        if not c:
+            return
+        env = window(t, c.get("t0", 0.0), c.get("t1", self.tl.duration + 1),
+                     c.get("fade_in", 0.3), c.get("fade_out", 0.3)) * c.get("alpha", 0.9)
+        if env <= 0:
+            return
+        ink = hex_rgb(c["ink"]) if c.get("ink") else self.ink
+        y = self.h * c.get("y", 0.045)
+        for line in c["lines"]:
+            face = Typeface(self.f_kicker.path, line.get("size", 18) * self.s,
+                            line.get("weight", 600), line.get("tracking", 0.28))
+            self._text(draw, face, line["text"], self.w / 2, y, ink, env * line.get("alpha", 1.0),
+                       anchor="c")
+            y += face.size * line.get("leading", 1.55)
 
     def _progress(self, draw, t):
         c = self.cfg.get("progress")
