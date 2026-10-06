@@ -71,6 +71,26 @@ def _ellipse(k):
     return cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
 
 
+def prep_photo(rgb_u8, denoise=0.0, upscale=1.0, sharpen=0.0):
+    """Classical clean-up for compressed listing photos.
+
+    Non-local means removes JPEG mosquito noise and blocking on flat walls,
+    Lanczos enlarges, an unsharp mask restores crispness. No generative fill.
+    """
+    out = rgb_u8
+    if denoise > 0:
+        out = cv2.fastNlMeansDenoisingColored(out, None, denoise, denoise, 5, 15)
+    if upscale and abs(upscale - 1.0) > 1e-3:
+        h, w = out.shape[:2]
+        out = cv2.resize(out, (int(round(w * upscale)), int(round(h * upscale))),
+                         interpolation=cv2.INTER_LANCZOS4)
+    if sharpen > 0:
+        f = out.astype(np.float32)
+        blur = cv2.GaussianBlur(f, (0, 0), 1.3 * max(1.0, upscale))
+        out = np.clip(f + sharpen * (f - blur), 0, 255).astype(np.uint8)
+    return out
+
+
 def simplify_depth(disp, rgb_u8, k_frac=0.02):
     """Drop thin structures (slats, railings, leaves) from the depth map.
 
@@ -103,8 +123,12 @@ class Plate:
     """
 
     def __init__(self, rgb_u8, disp, hfov=72.0, znear=1.0, zfar=14.0,
-                 band=0.035, edge_thr=0.07, layered=False, simplify=0.02):
+                 band=0.035, edge_thr=0.07, layered=False, simplify=0.02, dfloor=0.0):
         self.h, self.w = rgb_u8.shape[:2]
+        if dfloor:
+            # Nothing is farther than the room's own walls: views through the
+            # glass become a plane in the wall, so mullions stay straight.
+            disp = np.maximum(disp, dfloor)
         if simplify:
             disp = simplify_depth(disp, rgb_u8, simplify)
         self.disp = disp

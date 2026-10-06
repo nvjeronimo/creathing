@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 
 from .depth import load_depth
-from .warp import Cam, Plate
+from .warp import Cam, Plate, prep_photo
 
 CAM_KEYS = ("x", "y", "z", "yaw", "pitch", "roll", "zoom", "sx", "sy")
 
@@ -80,11 +80,15 @@ class Shot:
     drift: float = 1.0
     seed: int = 0
     # filled by Timeline
+    keys: list = None
+    sub: str = ""
+    label_t: list = None
+    heading: bool = True
     t0: float = 0.0
     t1: float = 0.0
     cut_in: float = 0.0
     cut_out: float = 0.0
-    zoom_fix: float = 1.0
+    zoom_fix: object = None  # (times, values) curve, filled by Timeline
 
 
 MOVES = [
@@ -116,6 +120,24 @@ def auto_shots(photos, total_beats, intro=8, outro=10, max_shots=20):
     return shots
 
 
+class _KeyPath:
+    """Camera keyframes on [0, 1], monotone cubic per parameter (no overshoot)."""
+
+    def __init__(self, keys):
+        from scipy.interpolate import PchipInterpolator
+        us = np.array([u for u, _ in keys], np.float64)
+        vals = np.array([c.astuple() for _, c in keys], np.float64)
+        if len(us) == 1:
+            us = np.array([0.0, 1.0])
+            vals = np.vstack([vals, vals])
+        self.f = PchipInterpolator(us, vals, axis=0, extrapolate=True)
+        self.lo, self.hi = us[0], us[-1]
+
+    def __call__(self, s):
+        s = min(max(s, self.lo), self.hi)
+        return Cam(*[float(v) for v in self.f(s)])
+
+
 class Timeline:
     def __init__(self, project, root):
         self.root = root
@@ -135,15 +157,26 @@ class Timeline:
             total = project.get("duration", 45.0) / self.beat
             shots_cfg = auto_shots(photos, int(round(total)))
         for i, s in enumerate(shots_cfg):
-            a = cam_from(s.get("from"))
-            b = cam_from(s.get("to"), a)
+            keys = None
+            if s.get("keys"):
+                keys, prev = [], None
+                for k in s["keys"]:
+                    prev = cam_from({kk: vv for kk, vv in k.items() if kk != "u"}, prev)
+                    keys.append((float(k["u"]), prev))
+                a, b = keys[0][1], keys[-1][1]
+            else:
+                a = cam_from(s.get("from"))
+                b = cam_from(s.get("to"), a)
             self.shots.append(Shot(
                 photo=s["photo"], beats=s["beats"], cam_from=a, cam_to=b,
                 speed=tuple(s.get("speed", (1.6, 1.6))),
                 out=s.get("out", {"type": "fly", "len": 0.5}),
                 label=s.get("label", ""), plate=s.get("plate", {}),
                 exposure=s.get("exposure", 1.0), drift=s.get("drift", 1.0),
-                seed=s.get("seed", i * 7 + 3)))
+                seed=s.get("seed", i * 7 + 3), sub=s.get("sub", ""),
+                label_t=s.get("label_t"), heading=s.get("heading", True)))
+            if keys:
+                self.shots[-1].keys = _KeyPath(keys)
         t = self.offset
         prev_len = 0.0
         for i, s in enumerate(self.shots):
@@ -173,6 +206,10 @@ class Timeline:
                 d = cv2.resize(d, (rgb.shape[1], rgb.shape[0]), interpolation=cv2.INTER_CUBIC)
             kw = dict(self.plate_defaults)
             kw.update(shot.plate)
+            prep = kw.pop("prep", None)
+            if prep:
+                rgb = prep_photo(rgb, **prep)
+                d = cv2.resize(d, (rgb.shape[1], rgb.shape[0]), interpolation=cv2.INTER_CUBIC)
             self._plates[key] = Plate(rgb, d, **kw)
         return self._plates[key]
 
@@ -192,10 +229,18 @@ class Timeline:
     def _base(self, shot, t):
         u = (t - shot.t0) / max(1e-6, shot.t1 - shot.t0)
         s = hermite01(u, *shot.speed)
+        if shot.keys is not None:
+            return shot.keys(s)
         return shot.cam_from.lerp(shot.cam_to, s)
 
     def camera(self, shot, t, with_fix=True):
         cam = self._base(shot, t)
+        if shot.heading:
+            # Fly where you look: forward and sideways follow the yaw.
+            y = math.radians(cam.yaw)
+            x, z = cam.x, cam.z
+            cam.x = x * math.cos(y) + z * math.sin(y)
+            cam.z = -x * math.sin(y) + z * math.cos(y)
         # Bank into the turn: roll follows yaw rate and sideways speed.
         dt = 1.0 / 60
         c0, c1 = self._base(shot, t - dt), self._base(shot, t + dt)
@@ -204,8 +249,9 @@ class Timeline:
         cam.roll += 0.35 * yaw_rate + 9.0 * side
         for k, v in self._drift(shot, t).items():
             setattr(cam, k, getattr(cam, k) + v)
-        if with_fix:
-            cam.zoom *= shot.zoom_fix
+        if with_fix and shot.zoom_fix is not None:
+            ts, vs = shot.zoom_fix
+            cam.zoom *= float(np.interp(t, ts, vs))
         i = self.shots.index(shot)
         # outgoing transition
         if i < len(self.shots) - 1:
@@ -295,36 +341,60 @@ class Timeline:
         return min(max(px, 0.0), self.w), min(max(py, 0.0), self.h)
 
     def _fix_zoom(self):
-        """Per-shot constant zoom so roll, yaw and drift never show borders."""
+        """Zoom curve per shot so roll, yaw and drift never show borders.
+
+        Sampled over the shot, made conservative with a running max, then
+        smoothed, so the correction breathes slowly instead of stepping.
+        """
         for i, s in enumerate(self.shots):
-            plate_w = plate_h = None
-            need = 1.0
-            ts = np.linspace(s.t0, s.t1, 24)
-            for t in map(float, ts):
-                # skip transition windows, the blur and the mix hide edges there
-                if i > 0 and t < s.cut_in + self.shots[i - 1].out.get("len", 0.5) / 2:
-                    continue
-                if i < len(self.shots) - 1 and t > s.cut_out - s.out.get("len", 0.5) / 2:
-                    continue
-                cam = self.camera(s, t, with_fix=False)
-                need = max(need, self._cover_need(s, cam))
-            s.zoom_fix = need
+            lo = s.t0
+            hi = s.t1
+            if i > 0:
+                lo = s.cut_in + self.shots[i - 1].out.get("len", 0.5) / 2
+            if i < len(self.shots) - 1:
+                hi = s.cut_out - s.out.get("len", 0.5) / 2
+            ts = np.linspace(lo, max(lo + 1e-3, hi), 32)
+            need = np.array([self._cover_need(s, self.camera(s, float(t), with_fix=False))
+                             for t in ts])
+            need = np.maximum.reduce([need, np.roll(need, 1), np.roll(need, -1)])
+            k = np.array([1, 2, 3, 2, 1], np.float64)
+            pad = np.pad(need, 2, mode="edge")
+            smooth = np.convolve(pad, k / k.sum(), mode="valid")
+            need = np.maximum(need, smooth) * 1.004
+            # hold the edge values through the transition windows
+            ts = np.concatenate([[s.t0 - 1.0], ts, [s.t1 + 1.0]])
+            need = np.concatenate([[need[0]], need, [need[-1]]])
+            s.zoom_fix = (ts, need)
 
     def _cover_need(self, shot, cam):
         """Smallest zoom multiplier that keeps the frame inside the photo."""
         plate = self.plate(shot)
-        z = 1.0
-        for _ in range(40):
+        mw = 32
+        mh = max(8, int(round(mw * self.h / self.w)))
+
+        def inside(z):
             c = Cam(*cam.astuple())
             c.zoom *= z
-            su, sv = plate._maps(c, self.w, self.h, 24, 14, iters=4)
-            m = 2.0
-            inside = (su.min() >= m and sv.min() >= m and
-                      su.max() <= plate.w - m and sv.max() <= plate.h - m)
-            if inside:
-                return z
-            z *= 1.01
-        return z
+            su, sv = plate._maps(c, self.w, self.h, mw, mh, iters=4)
+            # map samples sit at pixel centres: extend to the frame edge
+            m = 1.0
+            ex_u = (su.max() - su.min()) / (mw - 1) * 0.5
+            ex_v = (sv.max() - sv.min()) / (mh - 1) * 0.5
+            return (su.min() - ex_u >= m and sv.min() - ex_v >= m and
+                    su.max() + ex_u <= plate.w - m and sv.max() + ex_v <= plate.h - m)
+
+        if inside(1.0):
+            return 1.0
+        lo, hi = 1.0, 1.25
+        while not inside(hi) and hi < 4:
+            lo, hi = hi, hi * 1.25
+        for _ in range(14):
+            mid = 0.5 * (lo + hi)
+            if inside(mid):
+                hi = mid
+            else:
+                lo = mid
+        return hi
 
     # ---------------------------------------------------------------- frames
     def active(self, t):

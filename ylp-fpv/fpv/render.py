@@ -48,6 +48,7 @@ def main():
     ap.add_argument("--workers", type=int, default=os.cpu_count())
     ap.add_argument("--frames", default="")
     ap.add_argument("--stills", default="")
+    ap.add_argument("--cols", type=int, default=2)
     ap.add_argument("--audio", default="")
     ap.add_argument("--no-graphics", action="store_true")
     ap.add_argument("--crf", type=int, default=18)
@@ -68,7 +69,7 @@ def main():
             cv2.putText(img, f"{t:.2f}s", (12, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                         (255, 255, 0), 2, cv2.LINE_AA)
             tiles.append(img)
-        cols = 2 if len(tiles) > 1 else 1
+        cols = min(args.cols, len(tiles))
         while len(tiles) % cols:
             tiles.append(np.zeros_like(tiles[0]))
         rows = [np.hstack(tiles[r:r + cols]) for r in range(0, len(tiles), cols)]

@@ -1,0 +1,243 @@
+{
+ "fps": 30,
+ "bpm": 120,
+ "size": [
+  1080,
+  1920
+ ],
+ "duration": 34.0,
+ "photos": "assets/vm687/photos",
+ "depth": "assets/vm687/depth",
+ "plate": {
+  "hfov": 84,
+  "znear": 1.0,
+  "zfar": 12,
+  "simplify": 0.02,
+  "prep": {
+   "denoise": 3,
+   "upscale": 1.5,
+   "sharpen": 0.35
+  }
+ },
+ "finish": {
+  "grain": 0.008,
+  "vignette": 0.08,
+  "bloom": 0.06,
+  "warmth": 0.02,
+  "contrast": 0.05,
+  "sharpen": 0.2,
+  "knee": 0.9
+ },
+ "shots": [
+  {
+   "photo": "01_living.jpg",
+   "beats": 12,
+   "from": {
+    "yaw": 4,
+    "z": 0,
+    "zoom": 1.0
+   },
+   "to": {
+    "yaw": 7,
+    "z": 0.26,
+    "zoom": 1.06
+   },
+   "speed": [
+    1.2,
+    2.2
+   ],
+   "out": {
+    "type": "fly",
+    "len": 0.6,
+    "focus": [
+     0.6,
+     0.52
+    ],
+    "zoom": 3.0,
+    "push": 0.22,
+    "hit": 0.6
+   },
+   "plate": {
+    "dfloor": 0.045
+   }
+  },
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 8,
+   "label": "Kitchen",
+   "sub": "Open-plan",
+   "from": {
+    "yaw": -16,
+    "z": 0,
+    "zoom": 1.0
+   },
+   "to": {
+    "yaw": -3,
+    "z": 0.24,
+    "zoom": 1.06
+   },
+   "speed": [
+    1.6,
+    2.2
+   ],
+   "out": {
+    "type": "fly",
+    "len": 0.55,
+    "focus": [
+     0.5,
+     0.46
+    ],
+    "zoom": 2.8,
+    "push": 0.2
+   },
+   "plate": {
+    "dfloor": 0.1
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 8,
+   "from": {
+    "yaw": -6,
+    "pitch": -2,
+    "z": 0,
+    "zoom": 1.0
+   },
+   "to": {
+    "yaw": -3,
+    "pitch": 0,
+    "z": 0.28,
+    "zoom": 1.05
+   },
+   "speed": [
+    2.0,
+    2.0
+   ],
+   "out": {
+    "type": "whip_r",
+    "len": 0.45,
+    "angle": 16,
+    "bank": 6
+   },
+   "plate": {
+    "dfloor": 0.1
+   }
+  },
+  {
+   "photo": "05_garden_room.jpg",
+   "beats": 8,
+   "label": "Garden View",
+   "sub": "Floor-to-ceiling glazing",
+   "from": {
+    "yaw": -19,
+    "z": 0,
+    "zoom": 1.0
+   },
+   "to": {
+    "yaw": -15,
+    "z": 0.26,
+    "zoom": 1.08
+   },
+   "speed": [
+    2.0,
+    2.0
+   ],
+   "out": {
+    "type": "whip_r",
+    "len": 0.45,
+    "angle": 16,
+    "bank": 6
+   },
+   "plate": {
+    "dfloor": 0.18
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 32,
+   "label": "Pool & Garden",
+   "sub": "Private pool",
+   "label_t": [
+    24.6,
+    27.7
+   ],
+   "speed": [
+    1.0,
+    1.0
+   ],
+   "keys": [
+    {
+     "u": 0.0,
+     "yaw": -20,
+     "pitch": -1,
+     "z": 0,
+     "zoom": 1.0
+    },
+    {
+     "u": 0.18,
+     "yaw": -16,
+     "z": 0.07
+    },
+    {
+     "u": 0.42,
+     "yaw": 15,
+     "z": 0.14,
+     "pitch": 0
+    },
+    {
+     "u": 0.6,
+     "yaw": 19,
+     "z": 0.26,
+     "zoom": 1.12
+    },
+    {
+     "u": 1.0,
+     "yaw": 20,
+     "z": 0.34,
+     "zoom": 1.2
+    }
+   ],
+   "plate": {
+    "dfloor": 0.11
+   }
+  }
+ ],
+ "music": {
+  "drop": 6.0,
+  "outro": 28.0,
+  "hits": [
+   0.3
+  ],
+  "fade": 1.8
+ },
+ "graphics": {
+  "fonts": "assets/fonts",
+  "theme": "light",
+  "sizes": {
+   "kicker": 24,
+   "title": 150,
+   "sub": 48,
+   "room": 74,
+   "room_caps": 19,
+   "small": 22
+  },
+  "intro": {
+   "t0": 0.3,
+   "t1": 4.7,
+   "kicker": "BRAND NEW  \u00b7  ALGARVE",
+   "title": "Vilamoura",
+   "subtitle": "Contemporary villa",
+   "veil": 0.35
+  },
+  "label_veil": 0.45,
+  "outro": {
+   "t0": 28.0,
+   "kicker": "VILAMOURA  \u00b7  ALGARVE",
+   "title": "Contemporary\nVilla",
+   "ref": "REF.  VM687",
+   "url": "yourluxuryproperty.com",
+   "defocus": 16,
+   "veil": 0.28
+  }
+ }
+}

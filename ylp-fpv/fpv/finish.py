@@ -5,8 +5,10 @@ import numpy as np
 
 class Finisher:
     def __init__(self, w, h, grain=0.009, vignette=0.16, bloom=0.07,
-                 warmth=0.025, contrast=0.06, sharpen=0.25, seed=7):
+                 warmth=0.025, contrast=0.06, sharpen=0.25, seed=7, knee=0.72,
+                 exposure=1.0):
         self.w, self.h = w, h
+        self.knee, self.exposure = knee, exposure
         self.grain, self.bloom = grain, bloom
         self.warmth, self.contrast, self.sharpen = warmth, contrast, sharpen
         yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
@@ -35,7 +37,9 @@ class Finisher:
             small = cv2.resize(hi, (self.w // 4, self.h // 4), interpolation=cv2.INTER_AREA)
             small = cv2.GaussianBlur(small, (0, 0), 9)
             x = x + self.bloom * cv2.resize(small, (self.w, self.h), interpolation=cv2.INTER_LINEAR)
-        x = self._shoulder(x) * self.vig
+        if self.exposure != 1.0:
+            x = x * self.exposure
+        x = self._shoulder(x, self.knee) * self.vig
         y = np.clip(x, 0, 1) ** (1 / 2.2)
         if self.contrast:
             y = y + self.contrast * (y - 0.5) * (1 - np.abs(2 * y - 1))

@@ -140,11 +140,11 @@ def clap(seed=0):
     return x * e * 0.22
 
 
-def sub(freq, dur):
-    n = int(dur * SR)
+def sub(freq, dur, release=0.08):
+    n = int((dur + release) * SR)
     t = np.arange(n) / SR
     x = np.sin(2 * np.pi * freq * t) + 0.18 * np.sin(4 * np.pi * freq * t)
-    e = env_adsr(n, 0.006, 0.12, 0.75, 0.08, dur - 0.08)
+    e = env_adsr(n, 0.006, 0.12, 0.75, release, dur)
     return np.tanh(1.3 * x) * e * 0.45
 
 
@@ -330,7 +330,7 @@ def build(project_path, root, out_path, with_music=True, with_sfx=True):
                 bass.add(sub(midi(root_note + 12), beat * 0.2), t + beat * 0.75, gain=0.5)
             t += beat
             b += 1
-        bass.add(sub(midi(CHORDS["Fmaj9"][0]), 2.6), outro, gain=0.9)
+        bass.add(sub(midi(CHORDS["Fmaj9"][0]), 1.2, release=2.2), outro, gain=0.85)
         drums.add(kk, outro, gain=0.9)
 
         # build into the drop

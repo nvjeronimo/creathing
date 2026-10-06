@@ -1,0 +1,9 @@
+__pycache__/
+models/
+# Listing photos belong to the agency and the repo is public: never commit them.
+assets/photos/*
+!assets/photos/.gitkeep
+assets/*/photos/
+assets/depth/
+assets/*/depth/
+output/
