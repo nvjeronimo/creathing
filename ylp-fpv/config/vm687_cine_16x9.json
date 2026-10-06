@@ -876,30 +876,39 @@
     "fade_out": 0.25
    },
    {
-    "t0": 23.533,
+    "t0": 24.083,
     "main": "Vilamoura",
     "stack": [
      "BRAND NEW",
      "CONTEMPORARY VILLA"
     ],
-    "y": 0.47,
-    "size": 86,
+    "y": 0.665,
+    "size": 66,
     "ink": "#F5F1EA",
     "fade_in": 0.9,
     "lines": [
      {
       "text": "REF.  VM687",
-      "size": 14,
-      "dy": 64,
+      "size": 13,
+      "dy": 52,
       "color": "accent"
      },
      {
       "text": "yourluxuryproperty.com",
-      "size": 14,
-      "dy": 30,
-      "alpha": 0.75
+      "size": 13,
+      "dy": 26,
+      "alpha": 0.7
      }
     ]
+   }
+  ],
+  "logos": [
+   {
+    "path": "assets/brand/ylp-logo.png",
+    "t0": 23.483,
+    "height": 0.36,
+    "y": 0.34,
+    "fade_in": 1.0
    }
   ]
  },

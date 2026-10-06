@@ -74,6 +74,7 @@ class Graphics:
     def __init__(self, project, root, w, h, timeline):
         g = project["graphics"]
         self.cfg = g
+        self.root = root
         self.tl = timeline
         self.w, self.h = w, h
         self.vertical = h > w
@@ -212,6 +213,7 @@ class Graphics:
         veil = self._labels(layer, draw, t, veil)
         veil = self._specs(layer, draw, t, veil)
         veil = self._outro(layer, draw, t, veil)
+        self._logos(layer, t)
         self._lockups(layer, draw, t)
         self._watermark(draw, t)
         self._progress(draw, t)
@@ -420,6 +422,32 @@ class Graphics:
                 self._text(draw, face, extra["text"], self.w / 2, y, color,
                            env * ease_out((lt - 0.6 - 0.15 * k) / 0.7) * extra.get("alpha", 0.9),
                            anchor="c")
+
+    def _logos(self, layer, t):
+        """Brand artwork (transparent PNG) placed by its full canvas, so the
+        designer's own centring is kept."""
+        for c in self.cfg.get("logos", []):
+            env = window(t, c["t0"], c.get("t1", self.tl.duration + 1),
+                         c.get("fade_in", 0.9), c.get("fade_out", 0.4)) * c.get("alpha", 1.0)
+            if env <= 0.002:
+                continue
+            hpx = max(8, int(self.h * c.get("height", 0.3)))
+            key = (c["path"], hpx)
+            cache = self.__dict__.setdefault("_logo_cache", {})
+            if key not in cache:
+                src = Image.open(os.path.join(self.root, c["path"])).convert("RGBA")
+                wpx = max(8, int(src.width * hpx / src.height))
+                cache[key] = src.resize((wpx, hpx), Image.LANCZOS)
+            img = cache[key]
+            if env < 0.999:
+                a = img.getchannel("A").point(lambda v: int(v * env))
+                img = img.copy()
+                img.putalpha(a)
+            lt = t - c["t0"]
+            drift = (1 - ease_out(lt / 1.4, 3)) * 8 * self.s
+            x = int(self.w * c.get("x", 0.5) - img.width / 2)
+            y = int(self.h * c.get("y", 0.35) - img.height / 2 + drift)
+            layer.alpha_composite(img, (x, y))
 
     def _watermark(self, draw, t):
         """Small brand mark fixed at the top for the whole film (Ref 2 style)."""

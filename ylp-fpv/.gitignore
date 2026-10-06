@@ -7,3 +7,5 @@ assets/*/photos/
 assets/depth/
 assets/*/depth/
 output/
+# Client brand artwork is not ours to publish
+assets/brand/
