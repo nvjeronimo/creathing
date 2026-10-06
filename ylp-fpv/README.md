@@ -10,8 +10,18 @@ supersampling), then graded, titled and scored.
 
 | Project | Config | Format |
 |---------|--------|--------|
-| VM687, Vilamoura | `config/vm687_reel.json` | 1080x1920 reel, 34 s |
+| VM687, Vilamoura, cinematic preset | `config/vm687_cine_16x9.json` | 1920x1080, 28 s, hard cuts on 108 BPM |
+| VM687, Vilamoura, FPV reel | `config/vm687_reel.json` | 1080x1920, 34 s, fly-through and whip transitions |
+| VM687, Vilamoura, FPV wide | `config/vm687_wide.json` | 1920x1080, 34 s |
 | LA691, Lagos | `config/la691.json` | 1920x1080, 45 s (auto edit until the photos are in) |
+
+The cinematic preset copies the editing language of two reference films,
+measured frame by frame and on the spectrogram: see
+`docs/reference_breakdown.md`. Hard cuts on the music grid, a flash-cut hook,
+a wordmark over a texture, a speed-ramped dive on the drop, gimbal moves with
+parallax, macro inserts with depth of field, a low-key warm grade matched by
+numbers, and sound design (downlifter, ticks, impact, dropout, reverse swell).
+`tools/ref_*.py` analyse new references the same way.
 
 ## Pipeline
 
@@ -22,7 +32,7 @@ supersampling), then graded, titled and scored.
 | 3 | `fpv/warp.py` | Photo clean-up, depth floor and simplification, 2.5D camera by ray / depth-surface intersection |
 | 4 | `fpv/engine.py` | Beat-grid timeline, keyframed FPV paths that fly where they look, banking, transitions, motion blur |
 | 5 | `fpv/finish.py` | Highlight roll-off, bloom, split tone, vignette, fine grain |
-| 6 | `fpv/graphics.py` | Title, room labels, specs, end card; light or dark theme, Reels-safe layout in 9:16 |
+| 6 | `fpv/graphics.py` | Title, room labels, specs, end card, wordmark lockups; light or dark theme, Reels-safe layout in 9:16 |
 | 7 | `fpv/audio.py` | Synthesized deep-house bed plus whooshes and hits locked to every cut |
 | 8 | `fpv/render.py` | Parallel render, H.264 encode, audio mux, contact sheets for review |
 

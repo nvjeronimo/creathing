@@ -84,6 +84,7 @@ class Shot:
     sub: str = ""
     label_t: list = None
     heading: bool = True
+    dof: dict = None
     t0: float = 0.0
     t1: float = 0.0
     cut_in: float = 0.0
@@ -157,16 +158,17 @@ class Timeline:
             total = project.get("duration", 45.0) / self.beat
             shots_cfg = auto_shots(photos, int(round(total)))
         for i, s in enumerate(shots_cfg):
+            aim = self._aimer(s)
             keys = None
             if s.get("keys"):
                 keys, prev = [], None
                 for k in s["keys"]:
-                    prev = cam_from({kk: vv for kk, vv in k.items() if kk != "u"}, prev)
+                    prev = cam_from(aim({kk: vv for kk, vv in k.items() if kk != "u"}), prev)
                     keys.append((float(k["u"]), prev))
                 a, b = keys[0][1], keys[-1][1]
             else:
-                a = cam_from(s.get("from"))
-                b = cam_from(s.get("to"), a)
+                a = cam_from(aim(s.get("from")))
+                b = cam_from(aim(s.get("to")), a)
             self.shots.append(Shot(
                 photo=s["photo"], beats=s["beats"], cam_from=a, cam_to=b,
                 speed=tuple(s.get("speed", (1.6, 1.6))),
@@ -174,7 +176,8 @@ class Timeline:
                 label=s.get("label", ""), plate=s.get("plate", {}),
                 exposure=s.get("exposure", 1.0), drift=s.get("drift", 1.0),
                 seed=s.get("seed", i * 7 + 3), sub=s.get("sub", ""),
-                label_t=s.get("label_t"), heading=s.get("heading", True)))
+                label_t=s.get("label_t"), heading=s.get("heading", True),
+                dof=s.get("dof")))
             if keys:
                 self.shots[-1].keys = _KeyPath(keys)
         t = self.offset
@@ -193,11 +196,28 @@ class Timeline:
         self._plates = {}
         self._fix_zoom()
 
+    def _aimer(self, shot_cfg):
+        """Turn {"aim": [x, y]} (point of the photo, 0..1) into yaw and pitch."""
+        def conv(d):
+            if not d or "aim" not in d or not shot_cfg.get("photo"):
+                return d
+            from PIL import Image
+            with Image.open(os.path.join(self.photos_dir, shot_cfg["photo"])) as im:
+                w, h = im.size
+            hfov = dict(self.plate_defaults, **shot_cfg.get("plate", {})).get("hfov", 72.0)
+            t = math.tan(math.radians(hfov) / 2)
+            ax, ay = d["aim"]
+            out = {k: v for k, v in d.items() if k != "aim"}
+            out["yaw"] = out.get("yaw", 0.0) + math.degrees(math.atan((ax - 0.5) * 2 * t))
+            out["pitch"] = out.get("pitch", 0.0) - math.degrees(math.atan((ay - 0.5) * 2 * t * h / w))
+            return out
+        return conv
+
     # ---------------------------------------------------------------- plates
     def plate(self, shot):
-        key = shot.photo
+        key = (shot.photo, json.dumps(shot.plate, sort_keys=True))
         if key not in self._plates:
-            if len(self._plates) >= 4:
+            if len(self._plates) >= 6:
                 self._plates.pop(next(iter(self._plates)))
             bgr = cv2.imread(os.path.join(self.photos_dir, shot.photo), cv2.IMREAD_COLOR)
             rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
@@ -347,6 +367,8 @@ class Timeline:
         smoothed, so the correction breathes slowly instead of stepping.
         """
         for i, s in enumerate(self.shots):
+            if not s.photo:
+                continue
             lo = s.t0
             hi = s.t1
             if i > 0:
@@ -402,8 +424,15 @@ class Timeline:
         return [s for s in self.shots if s.t0 <= t < s.t1] or [self.shots[-1]]
 
     def render_shot(self, shot, t, w, h, map_scale=0.5, coverage=False):
+        if not shot.photo:
+            img = np.zeros((h, w, 3), np.float32)
+            return (img, np.ones((h, w), np.float32)) if coverage else img
         cam = self.camera(shot, t)
-        res = self.plate(shot).render(cam, w, h, map_scale=map_scale, coverage=coverage)
+        dof = None
+        if shot.dof:
+            dof = dict(shot.dof)
+            dof["blur"] = dof.get("blur", 12.0) * w / 1920.0
+        res = self.plate(shot).render(cam, w, h, map_scale=map_scale, coverage=coverage, dof=dof)
         img, cov = res if coverage else (res, None)
         if shot.exposure != 1.0:
             img = img * shot.exposure
@@ -418,6 +447,8 @@ class Timeline:
         L = o.get("len", 0.5)
         p = clamp01((t - (a.cut_out - L / 2)) / L)
         typ = o.get("type", "fly")
+        if typ == "cut":
+            return self.render_shot(a if t < a.cut_out else b, t, w, h, map_scale)
         ia = self.render_shot(a, t, w, h, map_scale)
         if typ == "fly":
             ib, cov = self.render_shot(b, t, w, h, map_scale, coverage=True)
@@ -439,8 +470,6 @@ class Timeline:
         if typ == "dip":
             k = 1 - smoothstep(p * 2) if p < 0.5 else smoothstep(p * 2 - 1)
             return (ia if p < 0.5 else ib) * k
-        if typ == "cut":
-            return ia if p < 0.5 else ib
         m = smoothstep((p - 0.38) / 0.24)
         return ia * (1 - m) + ib * m
 
@@ -448,6 +477,8 @@ class Timeline:
         """Largest on-screen travel (px) of a probe grid during the shutter."""
         best = 0.0
         for s in self.active(t):
+            if not s.photo:
+                continue
             plate = self.plate(s)
             c0 = self.camera(s, t - shutter / 2)
             c1 = self.camera(s, t + shutter / 2)
@@ -474,8 +505,15 @@ class Timeline:
         div = 1 if n <= 6 else (2 if n <= 20 else 4)
         rw, rh = w // div, h // div
         acc = np.zeros((rh, rw, 3), np.float32)
+        cuts = [s.cut_out for s in self.shots[:-1] if s.out.get("type") == "cut"]
         for k in range(n):
             tk = t + shutter * ((k + 0.5) / n - 0.5)
+            for c in cuts:
+                # a real shutter never straddles an edit: keep samples on this side
+                if t < c <= tk:
+                    tk = c - 1e-4
+                elif tk < c <= t:
+                    tk = c
             acc += self.composite(tk, rw, rh, map_scale=1.0 if div > 1 else 0.5)
         acc /= n
         gap = ext / n / div

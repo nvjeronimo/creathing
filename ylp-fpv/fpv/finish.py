@@ -6,9 +6,11 @@ import numpy as np
 class Finisher:
     def __init__(self, w, h, grain=0.009, vignette=0.16, bloom=0.07,
                  warmth=0.025, contrast=0.06, sharpen=0.25, seed=7, knee=0.72,
-                 exposure=1.0):
+                 exposure=1.0, saturation=1.0, black=0.0, gamma=1.0, white=1.0, wb=None):
         self.w, self.h = w, h
+        self.wb = None if wb is None else np.array(wb, np.float32)
         self.knee, self.exposure = knee, exposure
+        self.saturation, self.black, self.gamma, self.white = saturation, black, gamma, white
         self.grain, self.bloom = grain, bloom
         self.warmth, self.contrast, self.sharpen = warmth, contrast, sharpen
         yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
@@ -39,8 +41,18 @@ class Finisher:
             x = x + self.bloom * cv2.resize(small, (self.w, self.h), interpolation=cv2.INTER_LINEAR)
         if self.exposure != 1.0:
             x = x * self.exposure
+        if self.wb is not None:
+            x = x * self.wb
         x = self._shoulder(x, self.knee) * self.vig
         y = np.clip(x, 0, 1) ** (1 / 2.2)
+        if self.gamma != 1.0:
+            y = y ** self.gamma
+        if self.black or self.white != 1.0:
+            # crush the toe and pull the top under clipping (print-like range)
+            y = np.clip((y - self.black) / (1 - self.black), 0, 1) * self.white
+        if self.saturation != 1.0:
+            lum = (y * np.array([0.2126, 0.7152, 0.0722], np.float32)).sum(axis=2, keepdims=True)
+            y = lum + self.saturation * (y - lum)
         if self.contrast:
             y = y + self.contrast * (y - 0.5) * (1 - np.abs(2 * y - 1))
         if self.warmth:

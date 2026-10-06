@@ -212,6 +212,7 @@ class Graphics:
         veil = self._labels(layer, draw, t, veil)
         veil = self._specs(layer, draw, t, veil)
         veil = self._outro(layer, draw, t, veil)
+        self._lockups(layer, draw, t)
         self._progress(draw, t)
         if veil.max() > 0:
             v = veil[..., None]
@@ -369,6 +370,55 @@ class Graphics:
         self._text(draw, self.f_small, c.get("url", ""), cx, url_y, self.ink, fade(1.6) * 0.85,
                    anchor="c")
         return veil
+
+    def _lockups(self, layer, draw, t):
+        """Wordmark lockup: serif name, hairline divider, two stacked caps lines.
+
+        Used over an abstract texture at the open and on black at the close,
+        the way luxury developers sign their films.
+        """
+        for c in self.cfg.get("lockups", []):
+            env = window(t, c["t0"], c.get("t1", self.tl.duration + 1),
+                         c.get("fade_in", 0.7), c.get("fade_out", 0.4))
+            if env <= 0:
+                continue
+            lt = t - c["t0"]
+            ink = hex_rgb(c["ink"]) if c.get("ink") else self.ink
+            serif = os.path.join(os.path.dirname(self.f_title.path), "CormorantGaramond.ttf")
+            main = Typeface(serif, c.get("size", 78) * self.s, c.get("weight", 400), 0.01)
+            caps = Typeface(self.f_kicker.path, c.get("caps_size", 13) * self.s, 500, 0.34)
+            mw = main.layout(c["main"])[1]
+            stack = c.get("stack", [])
+            sw = max((caps.layout(x)[1] for x in stack), default=0)
+            gap = 24 * self.s
+            total = mw + (2 * gap + sw if stack else 0)
+            x0 = self.w / 2 - total / 2
+            cy = self.h * c.get("y", 0.5)
+            drift = (1 - ease_out(lt / 1.2, 3)) * 6 * self.s
+            asc = main.ascent()
+            top = cy - asc * 0.62 + drift
+            self._text(draw, main, c["main"], x0, top, ink, env)
+            if stack:
+                xh_mid = top + asc * 0.62
+                half = asc * 0.36 * ease_out((lt - 0.15) / 0.6)
+                xd = x0 + mw + gap
+                if half > 0.5:
+                    draw.line([(xd, xh_mid - half), (xd, xh_mid + half)],
+                              fill=ink + (int(200 * env),), width=max(1, int(1.3 * self.s)))
+                lh = caps.size * 1.45
+                ys = xh_mid - lh * len(stack) / 2 + (lh - caps.size) / 2
+                for k, line in enumerate(stack):
+                    self._text(draw, caps, line, xd + gap, ys + k * lh, ink,
+                               env * ease_out((lt - 0.25 - 0.08 * k) / 0.6))
+            y = cy + asc * 0.6
+            for k, extra in enumerate(c.get("lines", [])):
+                face = Typeface(self.f_kicker.path, extra.get("size", 15) * self.s, 500,
+                                extra.get("tracking", 0.3))
+                color = self.gold if extra.get("color") == "accent" else ink
+                y += extra.get("dy", 40) * self.s
+                self._text(draw, face, extra["text"], self.w / 2, y, color,
+                           env * ease_out((lt - 0.6 - 0.15 * k) / 0.7) * extra.get("alpha", 0.9),
+                           anchor="c")
 
     def _progress(self, draw, t):
         c = self.cfg.get("progress")

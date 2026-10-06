@@ -1,0 +1,899 @@
+{
+ "fps": 30,
+ "bpm": 108,
+ "size": [
+  1920,
+  1080
+ ],
+ "photos": "assets/vm687/photos",
+ "depth": "assets/vm687/depth",
+ "plate": {
+  "hfov": 84,
+  "znear": 1.0,
+  "zfar": 12,
+  "simplify": 0.02,
+  "prep": {
+   "denoise": 3,
+   "upscale": 1.5,
+   "sharpen": 0.35
+  }
+ },
+ "finish": {
+  "exposure": 0.77,
+  "gamma": 1.27,
+  "black": 0.05,
+  "white": 1.0,
+  "saturation": 1.55,
+  "wb": [
+   1.0,
+   1.0,
+   0.94
+  ],
+  "knee": 0.86,
+  "contrast": 0.16,
+  "vignette": 0.22,
+  "bloom": 0.08,
+  "warmth": 0.015,
+  "grain": 0.011,
+  "sharpen": 0.22
+ },
+ "shots": [
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.37,
+     0.72
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.37,
+     0.72
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.37,
+     0.72
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.28,
+     0.42
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.28,
+     0.42
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.28,
+     0.42
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.19
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.72,
+     0.56
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.72,
+     0.56
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.72,
+     0.56
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.72,
+     0.6
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.72,
+     0.6
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.72,
+     0.6
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "05_garden_room.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.18
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.29,
+     0.58
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.29,
+     0.58
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.29,
+     0.58
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.5,
+     0.45
+    ],
+    "zoom": 2.1
+   },
+   "to": {
+    "aim": [
+     0.5,
+     0.45
+    ],
+    "zoom": 2.247,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.5,
+     0.45
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "01_living.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.045
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.6,
+     0.58
+    ],
+    "zoom": 2.2
+   },
+   "to": {
+    "aim": [
+     0.6,
+     0.58
+    ],
+    "zoom": 2.354,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.6,
+     0.58
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "tick"
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 0.5,
+   "plate": {
+    "dfloor": 0.19
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.29,
+     0.72
+    ],
+    "zoom": 2.0
+   },
+   "to": {
+    "aim": [
+     0.29,
+     0.72
+    ],
+    "zoom": 2.14,
+    "z": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.29,
+     0.72
+    ],
+    "blur": 9,
+    "strength": 1.3
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.4,
+   "speed": [
+    1,
+    1
+   ],
+   "from": {
+    "aim": [
+     0.72,
+     0.7
+    ],
+    "zoom": 2.2,
+    "x": -0.015
+   },
+   "to": {
+    "aim": [
+     0.72,
+     0.7
+    ],
+    "zoom": 2.3,
+    "x": 0.015
+   },
+   "dof": {
+    "focus": [
+     0.72,
+     0.7
+    ],
+    "blur": 10,
+    "strength": 1.2
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.9
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "speed": [
+    1,
+    1
+   ],
+   "keys": [
+    {
+     "u": 0.0,
+     "aim": [
+      0.5,
+      0.48
+     ],
+     "z": 0.0,
+     "zoom": 1.0,
+     "roll": 3.5
+    },
+    {
+     "u": 0.35,
+     "aim": [
+      0.5,
+      0.48
+     ],
+     "z": 0.2,
+     "roll": 0.6
+    },
+    {
+     "u": 1.0,
+     "aim": [
+      0.5,
+      0.48
+     ],
+     "z": 0.27,
+     "roll": 0.0
+    }
+   ],
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.6
+   }
+  },
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "speed": [
+    1.1,
+    1.1
+   ],
+   "from": {
+    "aim": [
+     0.49,
+     0.5
+    ],
+    "x": -0.06,
+    "z": 0.02,
+    "zoom": 1.12
+   },
+   "to": {
+    "aim": [
+     0.51,
+     0.5
+    ],
+    "x": 0.06,
+    "z": 0.1,
+    "zoom": 1.14
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": "03_kitchen_aisle.jpg",
+   "beats": 2,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.5,
+   "speed": [
+    1.2,
+    1.2
+   ],
+   "from": {
+    "aim": [
+     0.73,
+     0.63
+    ],
+    "zoom": 2.2,
+    "x": -0.02
+   },
+   "to": {
+    "aim": [
+     0.73,
+     0.63
+    ],
+    "zoom": 2.3100000000000005,
+    "x": 0.02
+   },
+   "dof": {
+    "focus": [
+     0.73,
+     0.63
+    ],
+    "blur": 11,
+    "strength": 1.4
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.6
+   }
+  },
+  {
+   "photo": "01_living.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.045
+   },
+   "speed": [
+    1.1,
+    1.1
+   ],
+   "from": {
+    "aim": [
+     0.5,
+     0.5
+    ],
+    "y": -0.02,
+    "z": 0.0,
+    "zoom": 1.04
+   },
+   "to": {
+    "aim": [
+     0.5,
+     0.5
+    ],
+    "y": 0.02,
+    "z": 0.22,
+    "zoom": 1.08
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 2,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.5,
+   "speed": [
+    1.2,
+    1.2
+   ],
+   "from": {
+    "aim": [
+     0.38,
+     0.74
+    ],
+    "zoom": 2.0,
+    "x": 0.02
+   },
+   "to": {
+    "aim": [
+     0.38,
+     0.74
+    ],
+    "zoom": 2.1,
+    "x": -0.02
+   },
+   "dof": {
+    "focus": [
+     0.38,
+     0.74
+    ],
+    "blur": 11,
+    "strength": 1.4
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.6
+   }
+  },
+  {
+   "photo": "05_garden_room.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.18
+   },
+   "speed": [
+    1.1,
+    1.1
+   ],
+   "from": {
+    "aim": [
+     0.36,
+     0.5
+    ],
+    "z": 0.0,
+    "zoom": 1.5
+   },
+   "to": {
+    "aim": [
+     0.36,
+     0.5
+    ],
+    "z": 0.22,
+    "zoom": 1.56
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": "02_kitchen.jpg",
+   "beats": 2,
+   "plate": {
+    "dfloor": 0.1
+   },
+   "drift": 0.5,
+   "speed": [
+    1.2,
+    1.2
+   ],
+   "from": {
+    "aim": [
+     0.5,
+     0.46
+    ],
+    "zoom": 2.3,
+    "y": 0.02
+   },
+   "to": {
+    "aim": [
+     0.5,
+     0.46
+    ],
+    "zoom": 2.415,
+    "y": -0.02
+   },
+   "dof": {
+    "focus": [
+     0.5,
+     0.46
+    ],
+    "blur": 11,
+    "strength": 1.4
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.6
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 6,
+   "plate": {
+    "dfloor": 0.19
+   },
+   "speed": [
+    1,
+    1
+   ],
+   "keys": [
+    {
+     "u": 0.0,
+     "aim": [
+      0.37,
+      0.55
+     ],
+     "z": 0.0,
+     "zoom": 1.5
+    },
+    {
+     "u": 0.3,
+     "aim": [
+      0.41,
+      0.54
+     ],
+     "z": 0.04
+    },
+    {
+     "u": 0.7,
+     "aim": [
+      0.6,
+      0.52
+     ],
+     "z": 0.1
+    },
+    {
+     "u": 1.0,
+     "aim": [
+      0.63,
+      0.51
+     ],
+     "z": 0.15,
+     "zoom": 1.54
+    }
+   ],
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 2,
+   "plate": {
+    "dfloor": 0.19
+   },
+   "drift": 0.5,
+   "speed": [
+    1.2,
+    1.2
+   ],
+   "from": {
+    "aim": [
+     0.72,
+     0.56
+    ],
+    "zoom": 2.0,
+    "x": -0.015
+   },
+   "to": {
+    "aim": [
+     0.72,
+     0.56
+    ],
+    "zoom": 2.1,
+    "x": 0.015
+   },
+   "dof": {
+    "focus": [
+     0.72,
+     0.56
+    ],
+    "blur": 9,
+    "strength": 1.4
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02,
+    "sfx_type": "air",
+    "sfx_gain": 0.6
+   }
+  },
+  {
+   "photo": "04_pool_view.jpg",
+   "beats": 4,
+   "plate": {
+    "dfloor": 0.19
+   },
+   "speed": [
+    1.2,
+    1.0
+   ],
+   "from": {
+    "aim": [
+     0.63,
+     0.5
+    ],
+    "z": 0.04,
+    "zoom": 1.45
+   },
+   "to": {
+    "aim": [
+     0.64,
+     0.5
+    ],
+    "z": 0.22,
+    "zoom": 1.55
+   },
+   "out": {
+    "type": "cut",
+    "len": 0.02
+   }
+  },
+  {
+   "photo": null,
+   "beats": 8
+  }
+ ],
+ "music": {
+  "drop": 4.4444,
+  "outro": 23.3333,
+  "arp_start": 0.0,
+  "riser": false,
+  "fade": 2.5,
+  "mute": [
+   [
+    3.667,
+    4.428
+   ]
+  ],
+  "events": [
+   {
+    "type": "downlifter",
+    "t": 0.0,
+    "dur": 2.222,
+    "gain": 0.9
+   },
+   {
+    "type": "impact",
+    "t": 2.222,
+    "gain": 0.75
+   },
+   {
+    "type": "shimmer",
+    "t": 2.302,
+    "gain": 0.9
+   },
+   {
+    "type": "reverse",
+    "t": 4.444,
+    "dur": 1.1,
+    "gain": 0.9
+   },
+   {
+    "type": "impact",
+    "t": 4.444,
+    "gain": 0.65
+   },
+   {
+    "type": "impact",
+    "t": 23.333,
+    "gain": 0.45
+   },
+   {
+    "type": "shimmer",
+    "t": 23.583,
+    "gain": 0.8
+   }
+  ]
+ },
+ "graphics": {
+  "fonts": "assets/fonts",
+  "theme": "dark",
+  "lockups": [
+   {
+    "t0": 2.272,
+    "t1": 4.324,
+    "main": "Vilamoura",
+    "stack": [
+     "BRAND NEW",
+     "CONTEMPORARY VILLA"
+    ],
+    "y": 0.5,
+    "size": 86,
+    "ink": "#F5F1EA",
+    "fade_in": 0.6,
+    "fade_out": 0.25
+   },
+   {
+    "t0": 23.533,
+    "main": "Vilamoura",
+    "stack": [
+     "BRAND NEW",
+     "CONTEMPORARY VILLA"
+    ],
+    "y": 0.47,
+    "size": 86,
+    "ink": "#F5F1EA",
+    "fade_in": 0.9,
+    "lines": [
+     {
+      "text": "REF.  VM687",
+      "size": 14,
+      "dy": 64,
+      "color": "accent"
+     },
+     {
+      "text": "yourluxuryproperty.com",
+      "size": 14,
+      "dy": 30,
+      "alpha": 0.75
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -235,8 +235,31 @@ class Plate:
         c = c * c * (3 - 2 * c)
         return self._up(c.astype(np.float32), ow, oh)
 
+    def _defocus(self, img, su, sv, cam, ow, oh, dof):
+        """Thin-lens depth of field from the depth map.
+
+        The circle of confusion grows with |1 - d_focus / d| (distances from
+        the moving camera); the image is blended between pre-blurred copies.
+        Blur happens in linear light, so highlights bloom like real bokeh.
+        """
+        z = cv2.remap(self.Z, su, sv, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        fx, fy = dof["focus"]
+        zf = float(cv2.remap(self.Z, np.array([[fx * self.w]], np.float32),
+                             np.array([[fy * self.h]], np.float32), cv2.INTER_LINEAR)[0, 0])
+        cz = float(cam.z)
+        coc = np.abs(1.0 - (zf - cz) / np.maximum(z - cz, 1e-3)) * dof.get("strength", 1.0)
+        coc = cv2.resize(np.clip(coc, 0, 1).astype(np.float32), (ow, oh),
+                         interpolation=cv2.INTER_LINEAR)
+        sig = float(dof["blur"])
+        levels = [img] + [cv2.GaussianBlur(img, (0, 0), max(0.3, sig * k)) for k in (0.33, 0.66, 1.0)]
+        pos = coc * 3.0
+        out = np.zeros_like(img)
+        for i, lev in enumerate(levels):
+            out += lev * np.clip(1 - np.abs(pos - i), 0, 1)[..., None]
+        return out
+
     def render(self, cam, ow, oh, map_scale=0.5, interp=cv2.INTER_CUBIC,
-               debug=False, coverage=False):
+               debug=False, coverage=False, dof=None):
         """Linear RGB float32 image of size (oh, ow)."""
         mw, mh = max(8, int(ow * map_scale)), max(8, int(oh * map_scale))
         su, sv = self._maps(cam, ow, oh, mw, mh)
@@ -247,6 +270,8 @@ class Plate:
         front = cv2.remap(self.mips[level], self._up(su, ow, oh) * k - 0.5,
                           self._up(sv, ow, oh) * k - 0.5,
                           interp, borderMode=cv2.BORDER_REFLECT_101)
+        if dof:
+            front = self._defocus(front, su, sv, cam, ow, oh, dof)
         if coverage:
             return front, self.coverage(su, sv, ow, oh)
         if not (self.layered and moving):

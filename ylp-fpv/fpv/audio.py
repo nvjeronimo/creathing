@@ -248,6 +248,61 @@ def riser(dur, seed=0):
     return x * 0.5
 
 
+def tick(seed=0):
+    """Crisp shutter tick for flash cuts."""
+    n = int(0.07 * SR)
+    t = np.arange(n) / SR
+    nz = np.random.default_rng(400 + seed).standard_normal(n)
+    click = bp(nz, 2500, 9500) * np.exp(-t * 900) * 0.7
+    tone = (np.sin(2 * np.pi * 2100 * t) * np.exp(-t * 120) * 0.22
+            + np.sin(2 * np.pi * 3350 * t) * np.exp(-t * 170) * 0.1)
+    return (click + tone) * 0.55
+
+
+def downlifter(dur, f0=1300.0, f1=190.0, seed=0):
+    """Falling harmonic tone over falling filtered noise (Ref 2 opening)."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = f0 * (f1 / f0) ** (t / dur)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    tone = np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph)
+    env = (1 - t / dur) ** 1.1 * np.minimum(t / 0.06, 1)
+    tone = lp(tone * env, 3500) * 0.22
+    nz = noise_sweep(dur, lambda tt: 3200 * (260 / 3200) ** np.clip(tt / dur, 0, 1), 0.8,
+                     lambda tt: np.clip(1 - tt / dur, 0, 1) ** 1.6, seed=seed) * 0.35
+    return np.vstack([tone, tone]) + nz
+
+
+def shimmer(seed=0):
+    """High bell cluster, the 'ting' on reveals."""
+    n = int(2.6 * SR)
+    t = np.arange(n) / SR
+    rng = np.random.default_rng(500 + seed)
+    out = np.zeros((2, n))
+    for k, fq in enumerate((2093.0, 3136.0, 4186.0, 5274.0)):
+        for ch in range(2):
+            det = fq * (1 + rng.uniform(-0.002, 0.002))
+            out[ch] += np.sin(2 * np.pi * det * t + rng.uniform(0, 6.28)) * np.exp(-t * (1.1 + 0.45 * k)) / (1 + 0.6 * k)
+    return out * np.minimum(t / 0.004, 1) * 0.075
+
+
+def reverse_swell(dur, seed=0):
+    """Reversed-cymbal swell that ends exactly on its target time."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    nz = hp(np.random.default_rng(600 + seed).standard_normal((2, n)), 2600)
+    return nz * (t / dur) ** 3.2 * 0.32
+
+
+def air(seed=0):
+    """Soft air whoosh for hard cuts into moving shots."""
+    return whoosh(0.32, 0.42, f_lo=480, f_hi=3400, f_end=900, bw=0.85, seed=700 + seed) * 0.6
+
+
+SFX = {"tick": lambda i: (tick(i), 0.0), "air": lambda i: (air(i), 0.32),
+       "impact": lambda i: (impact(i), 0.0), "shimmer": lambda i: (shimmer(i), 0.0)}
+
+
 # --------------------------------------------------------------- arrangement
 CHORDS = {
     # name: (bass midi, pad voicing midi, arp tones midi)
@@ -293,8 +348,8 @@ def build(project_path, root, out_path, with_music=True, with_sfx=True):
         for j, note in enumerate(final[2]):
             keys.add(pluck(midi(note)), outro + j * beat / 2, gain=0.8, pan=(-0.4, 0.4)[j % 2])
 
-        # arp: 8ths, from bar 2 to the outro, softer before the drop
-        t = off + bar
+        # arp: 8ths, from bar 2 (or "arp_start") to the outro, softer before the drop
+        t = m.get("arp_start", off + bar)
         step = beat / 2
         i = 0
         while t < outro - 0.01:
@@ -334,7 +389,8 @@ def build(project_path, root, out_path, with_music=True, with_sfx=True):
         drums.add(kk, outro, gain=0.9)
 
         # build into the drop
-        fx.add(riser(2 * bar - 0.05, seed=7), drop - 2 * bar, gain=0.7)
+        if m.get("riser", True):
+            fx.add(riser(2 * bar - 0.05, seed=7), drop - 2 * bar, gain=0.7)
 
     if with_sfx:
         shots = tl.shots
@@ -360,8 +416,23 @@ def build(project_path, root, out_path, with_music=True, with_sfx=True):
                 fx.add(w, c - 0.4 - L / 2, gain=0.8 * o.get("sfx", 1.0))
             if o.get("hit"):
                 fx.add(impact(seed=i), c, gain=0.55 * o["hit"])
+            kind = o.get("sfx_type")
+            if kind in SFX:
+                sig, lead = SFX[kind](i)
+                fx.add(sig, c - lead, gain=o.get("sfx_gain", 1.0))
         for hit_t in m.get("hits", []):
             fx.add(impact(seed=int(hit_t * 10)), hit_t, gain=0.5)
+        for k, ev in enumerate(m.get("events", [])):
+            typ, at, g = ev["type"], ev["t"], ev.get("gain", 1.0)
+            if typ == "downlifter":
+                fx.add(downlifter(ev.get("dur", 2.0), seed=k), at, gain=g)
+            elif typ == "riser":
+                fx.add(riser(ev.get("dur", 2.0), seed=k), at - ev.get("dur", 2.0), gain=g)
+            elif typ == "reverse":
+                fx.add(reverse_swell(ev.get("dur", 1.0), seed=k), at - ev.get("dur", 1.0), gain=g)
+            elif typ in SFX:
+                sig, lead = SFX[typ](k + 50)
+                fx.add(sig, at - lead, gain=g)
 
     # ------------------------------------------------------------ mixdown
     t = np.arange(n) / SR
@@ -378,7 +449,17 @@ def build(project_path, root, out_path, with_music=True, with_sfx=True):
              + keys_x * duck * 0.9 + apply_reverb(keys_x, ir_big, 0.3) * duck
              + bass.x * duck * 0.95
              + drums.x + apply_reverb(drums.x, ir_small, 0.1))
-    sfx = fx.x + apply_reverb(fx.x, ir_big, 0.25)
+    for t0m, t1m in m.get("mute", []):
+        g = np.ones(n)
+        i0, i1 = int(t0m * SR), int(t1m * SR)
+        dn, up = int(0.04 * SR), int(0.03 * SR)
+        floor = m.get("mute_floor", 0.05)
+        g[i0:i1] = floor
+        g[max(0, i0 - dn):i0] = np.linspace(1, floor, i0 - max(0, i0 - dn))
+        g[i1:i1 + up] = np.linspace(floor, 1, len(g[i1:i1 + up]))
+        music = music * g
+    # no sub in the effects reverb: a reverberated boom turns into mud
+    sfx = fx.x + apply_reverb(hp(fx.x, 250), ir_big, 0.25)
     mix = hp(music, 28) + hp(sfx, 40) * m.get("sfx_gain", 1.0)
     # fade in/out
     fade_in = np.clip(t / 0.25, 0, 1)
